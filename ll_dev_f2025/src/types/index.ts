@@ -1,0 +1,20 @@
+export interface TShirtItem {
+  id: number;
+  name: string;
+  size: string;
+  color: 'red' | 'black' | 'white';
+  quantity: number;
+}
+
+export type NavItem = 'home' | 'products' | 'components' | 'integrations';
+
+export type TabType = 'inventory' | 'order';
+
+export interface InventoryState {
+  inventory: TShirtItem[];
+  searchTerm: string;
+  activeTab: TabType;
+  activeNavItem: NavItem;
+  sidebarExpanded: boolean;
+  showFigmaReference: boolean;
+}
