@@ -1,6 +1,5 @@
 // Layout Components
 export { Sidebar } from './layout/Sidebar';
-export { Header } from './layout/Header';
 
 // UI Components
 export { SearchBar } from './ui/SearchBar';
@@ -8,5 +7,10 @@ export { ErrorBoundary } from './ui/ErrorBoundary';
 
 // Inventory Components
 export { ProductList } from './inventory/ProductList';
-export { InventoryPanel } from './inventory/InventoryPanel';
+export { ProductItem } from './inventory/ProductItem';
 export { OrderQueue } from './inventory/OrderQueue';
+
+// Page Components
+export { default as ProductsPage } from './pages/ProductsPage';
+export { default as FulfillmentPage } from './pages/FulfillmentPage';
+export { default as IntegrationsPage } from './pages/IntegrationsPage';

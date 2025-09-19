@@ -20,21 +20,21 @@ interface OrderItem {
 const mockOrders: OrderItem[] = [
   {
     id: 1,
-    item: { id: 1, name: 'Classic T-Shirt', size: 'M', color: 'red', quantity: 50 },
+    item: { id: 1, name: 'Classic T-Shirt', size: 'M', color: 'red', quantity: 50, requiredPcs: 24 },
     quantity: 25,
     status: 'pending',
     orderDate: '2024-01-15',
   },
   {
     id: 2,
-    item: { id: 2, name: 'Classic T-Shirt', size: 'L', color: 'black', quantity: 30 },
+    item: { id: 2, name: 'Classic T-Shirt', size: 'L', color: 'black', quantity: 30, requiredPcs: 24 },
     quantity: 15,
     status: 'processing',
     orderDate: '2024-01-14',
   },
   {
     id: 3,
-    item: { id: 3, name: 'Classic T-Shirt', size: 'S', color: 'white', quantity: 40 },
+    item: { id: 3, name: 'Classic T-Shirt', size: 'S', color: 'white', quantity: 40, requiredPcs: 24 },
     quantity: 20,
     status: 'completed',
     orderDate: '2024-01-13',

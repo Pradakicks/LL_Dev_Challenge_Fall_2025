@@ -1,13 +1,11 @@
 import { useState, useMemo } from 'react';
-import { TShirtItem, TabType, NavItem } from '@/types';
+import { TShirtItem, TabType } from '@/types';
 import { tshirtData } from '@/lib/data';
 
 export const useInventory = () => {
   const [inventory, setInventory] = useState<TShirtItem[]>(tshirtData);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('inventory');
-  const [activeNavItem, setActiveNavItem] = useState<NavItem>('materials');
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
 
   const updateQuantity = (id: number, newQuantity: number) => {
     setInventory(prev => prev.map(item => 
@@ -28,10 +26,6 @@ export const useInventory = () => {
     setSearchTerm,
     activeTab,
     setActiveTab,
-    activeNavItem,
-    setActiveNavItem,
-    sidebarExpanded,
-    setSidebarExpanded,
     updateQuantity,
   };
 };

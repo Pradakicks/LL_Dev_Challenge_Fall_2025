@@ -4,6 +4,7 @@ export interface TShirtItem {
   size: string;
   color: 'red' | 'black' | 'white';
   quantity: number;
+  requiredPcs: number;
 }
 
 export type NavItem = 'materials' | 'products' | 'fulfillment' | 'integrations';

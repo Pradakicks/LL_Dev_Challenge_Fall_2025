@@ -9,9 +9,9 @@ interface ProductListProps {
 
 export const ProductList = ({ items }: ProductListProps) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-2">
       {items.map((item) => (
-        <div key={item.id} className="flex items-center space-x-4 p-4 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
+        <div key={item.id} className="flex items-center space-x-4 h-16 hover:bg-gray-50 rounded-lg transition-colors cursor-pointer">
           {/* T-shirt Icon */}
           <div className={`w-12 h-12 rounded-lg flex items-center justify-center shadow-sm ${
             item.color === 'red' ? 'bg-red-500' :
