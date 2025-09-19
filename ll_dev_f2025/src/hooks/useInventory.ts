@@ -6,9 +6,8 @@ export const useInventory = () => {
   const [inventory, setInventory] = useState<TShirtItem[]>(tshirtData);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('inventory');
-  const [activeNavItem, setActiveNavItem] = useState<NavItem>('home');
+  const [activeNavItem, setActiveNavItem] = useState<NavItem>('materials');
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
-  const [showFigmaReference, setShowFigmaReference] = useState(false);
 
   const updateQuantity = (id: number, newQuantity: number) => {
     setInventory(prev => prev.map(item => 
@@ -33,8 +32,6 @@ export const useInventory = () => {
     setActiveNavItem,
     sidebarExpanded,
     setSidebarExpanded,
-    showFigmaReference,
-    setShowFigmaReference,
     updateQuantity,
   };
 };

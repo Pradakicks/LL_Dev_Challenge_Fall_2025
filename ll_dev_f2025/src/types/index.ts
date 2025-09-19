@@ -6,7 +6,7 @@ export interface TShirtItem {
   quantity: number;
 }
 
-export type NavItem = 'home' | 'products' | 'components' | 'integrations';
+export type NavItem = 'materials' | 'products' | 'fulfillment' | 'integrations';
 
 export type TabType = 'inventory' | 'order';
 

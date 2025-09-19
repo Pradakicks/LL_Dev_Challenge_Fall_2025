@@ -19,7 +19,7 @@ export const SearchBar = ({ value, onChange }: SearchBarProps) => {
           placeholder="Search Materials"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg"
+          className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg text-gray-900"
         />
       </div>
       
