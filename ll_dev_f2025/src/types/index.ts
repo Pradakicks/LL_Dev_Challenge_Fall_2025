@@ -24,6 +24,69 @@ export type TabType = 'inventory' | 'order';
 export type OrderStatus = 'pending' | 'processing' | 'completed';
 
 /**
+ * Sort options for inventory items
+ */
+export type SortOption = 'name' | 'size' | 'color' | 'quantity' | 'requiredPcs';
+
+/**
+ * Sort direction
+ */
+export type SortDirection = 'asc' | 'desc';
+
+/**
+ * Filter options for inventory items
+ */
+export interface FilterOptions {
+  sizes: string[];
+  colors: string[];
+  lowStock: boolean;
+}
+
+/**
+ * Sort and filter state
+ */
+export interface SortFilterState {
+  sortBy: SortOption;
+  sortDirection: SortDirection;
+  filters: FilterOptions;
+}
+
+/**
+ * External API product types (Platzi Fake Store API)
+ */
+export interface ExternalCategory {
+  id: number;
+  name: string;
+  image: string;
+  slug: string;
+}
+
+export interface ExternalProduct {
+  id: number;
+  title: string;
+  slug: string;
+  price: number;
+  description: string;
+  category: ExternalCategory;
+  images: string[];
+  creationAt?: string;
+  updatedAt?: string;
+}
+
+/**
+ * Converted product for our internal use
+ */
+export interface ConvertedProduct {
+  id: number;
+  name: string;
+  price: number;
+  description: string;
+  category: string;
+  image: string;
+  images: string[];
+}
+
+/**
  * Core T-shirt inventory item interface
  */
 export interface TShirtItem {

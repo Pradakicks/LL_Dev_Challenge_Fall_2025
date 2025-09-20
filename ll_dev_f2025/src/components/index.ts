@@ -10,12 +10,16 @@ export { Button } from './ui/Button';
 export { Input } from './ui/Input';
 export { Select } from './ui/Select';
 export { LoadingSpinner } from './ui/LoadingSpinner';
+export { SortFilterModal } from './ui/SortFilterModal';
 
 // Inventory Components
 export { ProductList } from './inventory/ProductList';
 export { ProductItem } from './inventory/ProductItem';
 export { OrderQueue } from './inventory/OrderQueue';
 export { OrderNewItemModal } from './inventory/OrderNewItemModal';
+
+// Product Components
+export { ProductCard } from './products/ProductCard';
 
 // Page Components
 export { default as ProductsPage } from './pages/ProductsPage';

@@ -10,12 +10,13 @@ import { saveToStorage, loadOrderData, STORAGE_KEYS } from '@/lib/storage';
 interface OrderQueueProps {
   items: TShirtItem[];
   onOrderCompleted?: (itemId: number, quantity: number) => void;
+  filterOrders?: (orders: OrderItem[]) => OrderItem[];
 }
 
 /**
  * Order queue component for managing and tracking orders with persistence
  */
-export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted }) => {
+export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted, filterOrders }) => {
   // Start with empty array to prevent hydration mismatch
   const [orders, setOrders] = useState<OrderItem[]>([]);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
@@ -35,6 +36,12 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
       saveToStorage(STORAGE_KEYS.ORDERS, orders);
     }
   }, [orders, isHydrated]);
+
+  // Filter orders based on search term
+  const filteredOrders = React.useMemo(() => {
+    if (!filterOrders) return orders;
+    return filterOrders(orders);
+  }, [orders, filterOrders]);
 
   /**
    * Gets the appropriate styling for order status
@@ -126,7 +133,12 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
         <div className="flex items-center justify-between mb-4">
           <div>
             <h3 className="text-lg font-semibold text-gray-800 mb-2">Order Queue</h3>
-            <p className="text-sm text-gray-500">Track and manage your orders</p>
+            <p className="text-sm text-gray-500">
+              {filteredOrders.length !== orders.length 
+                ? `Showing ${filteredOrders.length} of ${orders.length} orders`
+                : 'Track and manage your orders'
+              }
+            </p>
           </div>
           <Button
             onClick={() => setIsOrderModalOpen(true)}
@@ -138,23 +150,23 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
         </div>
 
         {/* Order Statistics */}
-        {orders.length > 0 && (
+        {filteredOrders.length > 0 && (
           <div className="grid grid-cols-3 gap-4 mb-4">
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
               <div className="text-yellow-800 font-semibold text-lg">
-                {orders.filter(o => o.status === 'pending').length}
+                {filteredOrders.filter(o => o.status === 'pending').length}
               </div>
               <div className="text-yellow-600 text-sm">Pending</div>
             </div>
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
               <div className="text-blue-800 font-semibold text-lg">
-                {orders.filter(o => o.status === 'processing').length}
+                {filteredOrders.filter(o => o.status === 'processing').length}
               </div>
               <div className="text-blue-600 text-sm">Processing</div>
             </div>
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               <div className="text-green-800 font-semibold text-lg">
-                {orders.filter(o => o.status === 'completed').length}
+                {filteredOrders.filter(o => o.status === 'completed').length}
               </div>
               <div className="text-green-600 text-sm">Completed</div>
             </div>
@@ -164,7 +176,7 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
 
       {/* Orders List */}
       <div className="space-y-3">
-        {orders.map((order) => (
+        {filteredOrders.map((order) => (
           <div 
             key={order.id} 
             className={`border rounded-lg p-4 transition-all duration-300 ${
@@ -259,17 +271,26 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
       </div>
 
       {/* Empty State */}
-      {orders.length === 0 && (
+      {filteredOrders.length === 0 && (
         <div className="text-center py-12">
           <div className="text-gray-400 text-6xl mb-4">📦</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No orders yet</h3>
-          <p className="text-gray-500 text-sm mb-4">Create your first order to get started</p>
-          <Button
-            onClick={() => setIsOrderModalOpen(true)}
-            variant="primary"
-          >
-            Create New Order
-          </Button>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            {orders.length === 0 ? 'No orders yet' : 'No orders match your search'}
+          </h3>
+          <p className="text-gray-500 text-sm mb-4">
+            {orders.length === 0 
+              ? 'Create your first order to get started' 
+              : 'Try adjusting your search terms'
+            }
+          </p>
+          {orders.length === 0 && (
+            <Button
+              onClick={() => setIsOrderModalOpen(true)}
+              variant="primary"
+            >
+              Create New Order
+            </Button>
+          )}
         </div>
       )}
 

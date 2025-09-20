@@ -9,7 +9,7 @@ interface SidebarProps {
   expanded: boolean;
   activeNavItem: NavItem;
   onNavItemClick: (item: NavItem) => void;
-  onToggleExpanded: () => void;
+  onLogout?: () => void;
 }
 
 const navItems: { 
@@ -44,7 +44,7 @@ const navItems: {
   },
 ];
 
-export const Sidebar = React.memo<SidebarProps>(({ expanded, activeNavItem, onNavItemClick, onToggleExpanded }) => {
+export const Sidebar = React.memo<SidebarProps>(({ expanded, activeNavItem, onNavItemClick, onLogout }) => {
   return (
     <nav 
       className={`${expanded ? LAYOUT.sidebar.expanded : LAYOUT.sidebar.collapsed} bg-white flex flex-col py-6 space-y-6 ${ANIMATIONS.transition} border-r border-gray-200 h-screen`}
@@ -97,26 +97,30 @@ export const Sidebar = React.memo<SidebarProps>(({ expanded, activeNavItem, onNa
         ))}
       </div>
       
-      {/* Bottom Profile Section with Expand/Collapse Button */}
+      {/* Bottom Profile Section with Logout Button */}
       <div className="mt-auto flex flex-col items-center space-y-2">
-        <button
-          onClick={onToggleExpanded}
-          className={`bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 ${ANIMATIONS.transitionColors} ${
-            expanded ? 'px-4 py-2 space-x-2' : 'w-6 h-6'
-          }`}
-          aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-        >
-          <Image 
-            src={ICONS.expandCollapse} 
-            alt="Expand/Collapse" 
-            width={16} 
-            height={16}
-            className="w-4 h-4"
-          />
-          {expanded && (
-            <span className="text-white text-sm font-medium">Logout</span>
-          )}
-        </button>
+        {/* Logout Button */}
+        {onLogout && (
+          <button
+            onClick={onLogout}
+            className={`bg-red-500 rounded-full flex items-center justify-center hover:bg-red-600 ${ANIMATIONS.transitionColors} ${
+              expanded ? 'px-4 py-2 space-x-2' : 'w-6 h-6'
+            }`}
+            aria-label="Logout"
+          >
+            <Image 
+              src="/assets/icons/logout.png" 
+              alt="Logout" 
+              width={16} 
+              height={16}
+              className="w-4 h-4"
+            />
+            {expanded && (
+              <span className="text-white text-sm font-medium">Logout</span>
+            )}
+          </button>
+        )}
+
         <div className="w-8 h-8 bg-gray-300 rounded-full" aria-label="User profile"></div>
       </div>
     </nav>

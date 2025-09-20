@@ -15,6 +15,7 @@ import {
 import { useState } from 'react';
 import { useInventory } from '@/hooks/useInventory';
 import { useNavigation } from '@/contexts/NavigationContext';
+import { NavItem } from '@/types';
 
 export default function Home() {
   const {
@@ -27,6 +28,13 @@ export default function Home() {
     addNewItem,
     addQuantityToItem,
     isHydrated,
+    filterOrders,
+    sortBy,
+    sortDirection,
+    filters,
+    setSortBy,
+    setSortDirection,
+    setFilters,
   } = useInventory();
   
   const {
@@ -37,6 +45,25 @@ export default function Home() {
   } = useNavigation();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+  const handleLogout = () => {
+    if (window.confirm('Are you sure you want to logout?')) {
+      // Clear all localStorage data
+      localStorage.clear();
+      // Reload the page to reset the application
+      window.location.reload();
+    }
+  };
+
+  const handleNavItemClick = (item: NavItem) => {
+    if (item === activeNavItem) {
+      // If clicking the same nav item, toggle sidebar
+      setSidebarExpanded(!sidebarExpanded);
+    } else {
+      // If clicking a different nav item, switch to that page
+      setActiveNavItem(item);
+    }
+  };
 
   // Render different pages based on active navigation item
   if (activeNavItem === 'products') {
@@ -67,8 +94,8 @@ export default function Home() {
         <Sidebar
           expanded={sidebarExpanded}
           activeNavItem={activeNavItem}
-          onNavItemClick={setActiveNavItem}
-          onToggleExpanded={() => setSidebarExpanded(!sidebarExpanded)}
+          onNavItemClick={handleNavItemClick}
+          onLogout={handleLogout}
         />
 
         <div className="flex-1 flex flex-col">
@@ -112,6 +139,14 @@ export default function Home() {
               <SearchBar
                 value={searchTerm}
                 onChange={setSearchTerm}
+                sortBy={sortBy}
+                sortDirection={sortDirection}
+                filters={filters}
+                onSortChange={(sortBy, sortDirection) => {
+                  setSortBy(sortBy);
+                  setSortDirection(sortDirection);
+                }}
+                onFiltersChange={setFilters}
               />
               
               {activeTab === 'inventory' && (
@@ -129,19 +164,44 @@ export default function Home() {
             {/* Bottom Section: Product Items */}
             <div className="flex-1 p-6 bg-white">
               {activeTab === 'inventory' ? (
-                <div className="space-y-2">
-                  {filteredInventory.map((item) => (
-                    <ProductItem
-                      key={item.id}
-                      item={item}
-                      onQuantityChange={updateQuantity}
-                    />
-                  ))}
+                <div className="space-y-4">
+                  {/* Sort/Filter Status */}
+                  {(filters.sizes.length > 0 || filters.colors.length > 0 || filters.lowStock || sortBy !== 'name' || sortDirection !== 'asc') && (
+                    <div className="flex items-center justify-between text-sm text-gray-600 bg-gray-50 p-3 rounded-lg">
+                      <div className="flex items-center space-x-4">
+                        <span>Sort: {sortBy} ({sortDirection})</span>
+                        {filters.sizes.length > 0 && <span>Size: {filters.sizes.join(', ')}</span>}
+                        {filters.colors.length > 0 && <span>Color: {filters.colors.join(', ')}</span>}
+                        {filters.lowStock && <span>Low Stock Only</span>}
+                      </div>
+                      <button
+                        onClick={() => {
+                          setSortBy('name');
+                          setSortDirection('asc');
+                          setFilters({ sizes: [], colors: [], lowStock: false });
+                        }}
+                        className="text-blue-600 hover:text-blue-800 font-medium"
+                      >
+                        Clear All
+                      </button>
+                    </div>
+                  )}
+                  
+                  <div className="space-y-2">
+                    {filteredInventory.map((item) => (
+                      <ProductItem
+                        key={item.id}
+                        item={item}
+                        onQuantityChange={updateQuantity}
+                      />
+                    ))}
+                  </div>
                 </div>
               ) : (
                 <OrderQueue 
                   items={filteredInventory} 
                   onOrderCompleted={addQuantityToItem}
+                  filterOrders={filterOrders}
                 />
               )}
             </div>
