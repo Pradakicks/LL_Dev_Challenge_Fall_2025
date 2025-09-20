@@ -17,13 +17,17 @@ export const useProducts = () => {
   /**
    * Load products from API
    */
-  const loadProducts = useCallback(async (reset: boolean = false) => {
+  const loadProducts = useCallback(async (reset: boolean = false, currentOffset?: number) => {
     try {
+      console.log('Loading products...', { reset, currentOffset, offset });
       setLoading(true);
       setError(null);
 
-      const currentOffset = reset ? 0 : offset;
-      const newProducts = await fetchProducts(PRODUCTS_PER_PAGE, currentOffset);
+      const offsetToUse = currentOffset !== undefined ? currentOffset : (reset ? 0 : offset);
+      console.log('Fetching products with offset:', offsetToUse);
+      
+      const newProducts = await fetchProducts(PRODUCTS_PER_PAGE, offsetToUse);
+      console.log('Fetched products:', newProducts.length);
 
       if (reset) {
         setProducts(newProducts);
@@ -36,6 +40,7 @@ export const useProducts = () => {
       // Check if we have more products to load
       setHasMore(newProducts.length === PRODUCTS_PER_PAGE);
     } catch (err) {
+      console.error('Error loading products:', err);
       setError(err instanceof Error ? err.message : 'Failed to load products');
     } finally {
       setLoading(false);
@@ -56,14 +61,14 @@ export const useProducts = () => {
    */
   const refreshProducts = useCallback(() => {
     setOffset(0);
-    loadProducts(true);
+    loadProducts(true, 0);
   }, [loadProducts]);
 
   /**
    * Initial load
    */
   useEffect(() => {
-    loadProducts(true);
+    loadProducts(true, 0);
   }, []);
 
   return {

@@ -11,7 +11,10 @@ import { Button } from '../ui/Button';
  * Products page component with external API integration
  */
 export default function ProductsPage() {
+  console.log('ProductsPage rendered');
   const { products, loading, error, hasMore, loadMore, refreshProducts } = useProducts();
+  
+  console.log('ProductsPage state:', { products: products.length, loading, error, hasMore });
 
   if (loading && products.length === 0) {
     return (
@@ -55,9 +58,15 @@ export default function ProductsPage() {
       <div className="space-y-6">
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          {products.map((product) => {
+            console.log('Mapping product:', product.name, product.id);
+            return <ProductCard key={product.id} product={product} />;
+          })}
+        </div>
+        
+        {/* Debug: Show products count */}
+        <div className="text-center py-4 bg-yellow-100 border border-yellow-300 rounded">
+          <p className="text-yellow-800">DEBUG: {products.length} products loaded</p>
         </div>
 
         {/* Load More Button */}
@@ -78,7 +87,7 @@ export default function ProductsPage() {
         {!hasMore && products.length > 0 && (
           <div className="text-center py-8">
             <p className="text-gray-500 text-sm">
-              You've reached the end of our product catalog
+              You&apos;ve reached the end of our product catalog
             </p>
           </div>
         )}
@@ -89,7 +98,7 @@ export default function ProductsPage() {
             <div className="text-gray-400 text-6xl mb-4">📦</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">No Products Found</h3>
             <p className="text-gray-500 text-sm">
-              We couldn't find any products at the moment
+              We couldn&apos;t find any products at the moment
             </p>
           </div>
         )}

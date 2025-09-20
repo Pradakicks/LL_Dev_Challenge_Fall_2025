@@ -66,7 +66,9 @@ export default function Home() {
   };
 
   // Render different pages based on active navigation item
+  console.log('Current activeNavItem:', activeNavItem);
   if (activeNavItem === 'products') {
+    console.log('Rendering ProductsPage');
     return <ProductsPage />;
   }
   

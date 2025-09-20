@@ -13,6 +13,7 @@ interface ProductCardProps {
  * Product card component for displaying individual products
  */
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+  console.log('ProductCard rendered for product:', product.name);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageLoading, setIsImageLoading] = useState(true);
 

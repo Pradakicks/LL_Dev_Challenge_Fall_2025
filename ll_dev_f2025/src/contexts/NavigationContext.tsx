@@ -19,7 +19,7 @@ interface NavigationProviderProps {
 
 export const NavigationProvider: React.FC<NavigationProviderProps> = ({ children }) => {
   // Use default values initially to prevent hydration mismatch
-  const [activeNavItem, setActiveNavItem] = useState<NavItem>('materials');
+  const [activeNavItem, setActiveNavItem] = useState<NavItem>('products');
   const [sidebarExpanded, setSidebarExpanded] = useState<boolean>(false);
   const [isHydrated, setIsHydrated] = useState(false);
 
