@@ -4,6 +4,10 @@ export { Sidebar } from './layout/Sidebar';
 // UI Components
 export { SearchBar } from './ui/SearchBar';
 export { ErrorBoundary } from './ui/ErrorBoundary';
+export { AddNewItemModal } from './ui/AddNewItemModal';
+export { Button } from './ui/Button';
+export { Input } from './ui/Input';
+export { Select } from './ui/Select';
 
 // Inventory Components
 export { ProductList } from './inventory/ProductList';

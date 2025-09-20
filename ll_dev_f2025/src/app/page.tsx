@@ -8,9 +8,10 @@ import {
   ErrorBoundary,
   ProductsPage,
   FulfillmentPage,
-  IntegrationsPage
+  IntegrationsPage,
+  AddNewItemModal
 } from '@/components';
-import Image from 'next/image';
+import { useState } from 'react';
 import { useInventory } from '@/hooks/useInventory';
 import { useNavigation } from '@/contexts/NavigationContext';
 
@@ -22,6 +23,7 @@ export default function Home() {
     activeTab,
     setActiveTab,
     updateQuantity,
+    addNewItem,
   } = useInventory();
   
   const {
@@ -30,6 +32,8 @@ export default function Home() {
     sidebarExpanded,
     setSidebarExpanded,
   } = useNavigation();
+
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   // Render different pages based on active navigation item
   if (activeNavItem === 'products') {
@@ -100,6 +104,7 @@ export default function Home() {
               
               {activeTab === 'inventory' && (
                 <button 
+                  onClick={() => setIsAddModalOpen(true)}
                   className="bg-[#444eaa] text-white py-3 px-6 rounded-lg hover:bg-[#3a4296] transition-colors font-semibold text-lg shadow-sm flex items-center space-x-2"
                   aria-label="Add new inventory item"
                 >
@@ -127,6 +132,13 @@ export default function Home() {
             </div>
           </main>
         </div>
+
+        {/* Add New Item Modal */}
+        <AddNewItemModal
+          isOpen={isAddModalOpen}
+          onClose={() => setIsAddModalOpen(false)}
+          onAddItem={addNewItem}
+        />
       </div>
     </ErrorBoundary>
   );
