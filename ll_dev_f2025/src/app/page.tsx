@@ -9,7 +9,8 @@ import {
   ProductsPage,
   FulfillmentPage,
   IntegrationsPage,
-  AddNewItemModal
+  AddNewItemModal,
+  LoadingSpinner
 } from '@/components';
 import { useState } from 'react';
 import { useInventory } from '@/hooks/useInventory';
@@ -24,6 +25,8 @@ export default function Home() {
     setActiveTab,
     updateQuantity,
     addNewItem,
+    addQuantityToItem,
+    isHydrated,
   } = useInventory();
   
   const {
@@ -46,6 +49,15 @@ export default function Home() {
   
   if (activeNavItem === 'integrations') {
     return <IntegrationsPage />;
+  }
+
+  // Show loading state until hydration is complete
+  if (!isHydrated) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <LoadingSpinner size="lg" text="Loading application..." />
+      </div>
+    );
   }
 
   // Default to Materials page (materials nav item)
@@ -127,7 +139,10 @@ export default function Home() {
                   ))}
                 </div>
               ) : (
-                <OrderQueue items={filteredInventory} />
+                <OrderQueue 
+                  items={filteredInventory} 
+                  onOrderCompleted={addQuantityToItem}
+                />
               )}
             </div>
           </main>
