@@ -1,8 +1,7 @@
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { TShirtItem, TabType, CreateTShirtItem, SortOption, SortDirection, FilterOptions } from '@/types';
 import { tshirtData } from '@/lib/data';
-import { generateId } from '@/lib/utils';
-import { saveToStorage, loadInventoryData, STORAGE_KEYS } from '@/lib/storage';
+import { getRepositoryFactory } from '@/lib/repositories/factory';
 
 /**
  * Custom hook for managing inventory state and operations with persistence
@@ -17,50 +16,72 @@ export const useInventory = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [filters, setFilters] = useState<FilterOptions>({ sizes: [], colors: [], lowStock: false });
 
-  // Load data from localStorage after hydration
+  // Load data from repository after hydration
   useEffect(() => {
-    const savedInventory = loadInventoryData();
-    setInventory(savedInventory);
-    setIsHydrated(true);
-  }, []);
+    const loadInventory = async () => {
+      try {
+        const materialRepository = getRepositoryFactory().getMaterialRepository();
+        const result = await materialRepository.getAll();
+        if (result.success && result.data) {
+          setInventory(result.data);
+        }
+      } catch (error) {
+        console.error('Error loading inventory:', error);
+      } finally {
+        setIsHydrated(true);
+      }
+    };
 
-  // Save inventory to localStorage whenever it changes (only after hydration)
-  useEffect(() => {
-    if (isHydrated) {
-      saveToStorage(STORAGE_KEYS.INVENTORY, inventory);
-    }
-  }, [inventory, isHydrated]);
+    loadInventory();
+  }, []);
 
   /**
    * Updates the quantity of a specific inventory item
    */
-  const updateQuantity = useCallback((id: number, newQuantity: number) => {
-    setInventory(prev => prev.map(item => 
-      item.id === id ? { ...item, quantity: Math.max(0, newQuantity) } : item
-    ));
+  const updateQuantity = useCallback(async (productId: number, newQuantity: number) => {
+    try {
+      const materialRepository = getRepositoryFactory().getMaterialRepository();
+      const result = await materialRepository.updateQuantity(productId, newQuantity);
+      if (result.success && result.data) {
+        setInventory(prev => prev.map(item => 
+        item.productId === productId ? result.data! : item
+      ));
+      }
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+    }
   }, []);
 
   /**
    * Adds a new item to the inventory
    */
-  const addNewItem = useCallback((newItem: CreateTShirtItem) => {
-    const existingIds = inventory.map(item => item.id);
-    const itemWithId: TShirtItem = {
-      ...newItem,
-      id: generateId(existingIds),
-    };
-    setInventory(prev => [...prev, itemWithId]);
-  }, [inventory]);
+  const addNewItem = useCallback(async (newItem: CreateTShirtItem) => {
+    try {
+      const materialRepository = getRepositoryFactory().getMaterialRepository();
+      const result = await materialRepository.create(newItem);
+      if (result.success && result.data) {
+        setInventory(prev => [...prev, result.data!]);
+      }
+    } catch (error) {
+      console.error('Error adding new item:', error);
+    }
+  }, []);
 
   /**
    * Adds quantity to an existing inventory item (used when orders are completed)
    */
-  const addQuantityToItem = useCallback((itemId: number, quantityToAdd: number) => {
-    setInventory(prev => prev.map(item => 
-      item.id === itemId 
-        ? { ...item, quantity: item.quantity + quantityToAdd }
-        : item
-    ));
+  const addQuantityToItem = useCallback(async (productId: number, quantityToAdd: number) => {
+    try {
+      const materialRepository = getRepositoryFactory().getMaterialRepository();
+      const result = await materialRepository.addQuantity(productId, quantityToAdd);
+      if (result.success && result.data) {
+        setInventory(prev => prev.map(item => 
+          item.productId === productId ? result.data! : item
+        ));
+      }
+    } catch (error) {
+      console.error('Error adding quantity:', error);
+    }
   }, []);
 
   const filteredInventory = useMemo(() => {

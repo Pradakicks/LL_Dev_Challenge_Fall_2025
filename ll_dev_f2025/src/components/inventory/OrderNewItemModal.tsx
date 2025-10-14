@@ -26,7 +26,7 @@ export const OrderNewItemModal: React.FC<OrderNewItemModalProps> = ({
   const [quantity, setQuantity] = useState<number>(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const selectedItem = availableItems.find(item => item.id.toString() === selectedItemId);
+  const selectedItem = availableItems.find(item => item.productId.toString() === selectedItemId);
 
   const handleInputChange = useCallback((field: string, value: string | number) => {
     if (field === 'item') {
@@ -85,7 +85,7 @@ export const OrderNewItemModal: React.FC<OrderNewItemModalProps> = ({
 
   // Create options for the item selector
   const itemOptions = availableItems.map(item => ({
-    value: item.id.toString(),
+    value: item.productId.toString(),
     label: `${item.name} (${item.size}, ${item.color}) - Stock: ${item.quantity}`,
   }));
 

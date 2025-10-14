@@ -192,7 +192,7 @@ export default function Home() {
                   <div className="space-y-2">
                     {filteredInventory.map((item) => (
                       <ProductItem
-                        key={item.id}
+                        key={item.productId}
                         item={item}
                         onQuantityChange={updateQuantity}
                       />

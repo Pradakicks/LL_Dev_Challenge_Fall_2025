@@ -5,11 +5,11 @@ import { TShirtItem, OrderItem, OrderStatus } from '@/types';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { OrderNewItemModal } from './OrderNewItemModal';
-import { saveToStorage, loadOrderData, STORAGE_KEYS } from '@/lib/storage';
+import { getRepositoryFactory } from '@/lib/repositories/factory';
 
 interface OrderQueueProps {
   items: TShirtItem[];
-  onOrderCompleted?: (itemId: number, quantity: number) => void;
+  onOrderCompleted?: (productId: number, quantity: number) => void;
   filterOrders?: (orders: OrderItem[]) => OrderItem[];
 }
 
@@ -23,19 +23,24 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
   const [recentlyCompleted, setRecentlyCompleted] = useState<number | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
-  // Load orders from localStorage after hydration
+  // Load orders from repository after hydration
   useEffect(() => {
-    const savedOrders = loadOrderData();
-    setOrders(savedOrders);
-    setIsHydrated(true);
-  }, []);
+    const loadOrders = async () => {
+      try {
+        const orderRepository = getRepositoryFactory().getOrderRepository();
+        const result = await orderRepository.getAll();
+        if (result.success && result.data) {
+          setOrders(result.data);
+        }
+      } catch (error) {
+        console.error('Error loading orders:', error);
+      } finally {
+        setIsHydrated(true);
+      }
+    };
 
-  // Save orders to localStorage whenever they change (only after hydration)
-  useEffect(() => {
-    if (isHydrated) {
-      saveToStorage(STORAGE_KEYS.ORDERS, orders);
-    }
-  }, [orders, isHydrated]);
+    loadOrders();
+  }, []);
 
   // Filter orders based on search term
   const filteredOrders = React.useMemo(() => {
@@ -78,43 +83,75 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
   /**
    * Handles creating a new order
    */
-  const handleCreateOrder = (orderData: { item: TShirtItem; quantity: number }) => {
-    const newOrder: OrderItem = {
-      id: Date.now(), // Simple ID generation for demo
-      item: orderData.item,
-      quantity: orderData.quantity,
-      status: 'pending',
-      orderDate: new Date().toISOString().split('T')[0],
-    };
-    
-    setOrders(prev => [...prev, newOrder]);
-    setIsOrderModalOpen(false);
+  const handleCreateOrder = async (orderData: { item: TShirtItem; quantity: number }) => {
+    try {
+      console.log('Creating order with data:', orderData);
+      const orderRepository = getRepositoryFactory().getOrderRepository();
+      const newOrderData = {
+        productId: orderData.item.productId,
+        quantity: orderData.quantity,
+        status: 'pending' as OrderStatus,
+        orderDate: new Date().toISOString().split('T')[0],
+      };
+      
+      console.log('Order data to create:', newOrderData);
+      const result = await orderRepository.create(newOrderData);
+      console.log('Order creation result:', result);
+      
+      if (result.success && result.data) {
+        console.log('Order created successfully:', result.data);
+        setOrders(prev => [...prev, result.data!]);
+        setIsOrderModalOpen(false);
+      } else {
+        console.error('Failed to create order:', result.error);
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+    }
   };
 
   /**
    * Updates the status of an order
    */
-  const updateOrderStatus = (orderId: number, newStatus: OrderStatus) => {
-    setOrders(prev => prev.map(order => {
-      if (order.id === orderId) {
-        // If order is being marked as completed, update inventory
-        if (newStatus === 'completed' && order.status !== 'completed' && onOrderCompleted) {
-          onOrderCompleted(order.item.id, order.quantity);
-          setRecentlyCompleted(orderId);
-          // Clear the recently completed indicator after 3 seconds
-          setTimeout(() => setRecentlyCompleted(null), 3000);
-        }
-        return { ...order, status: newStatus };
+  const updateOrderStatus = async (orderId: number, newStatus: OrderStatus) => {
+    try {
+      const orderRepository = getRepositoryFactory().getOrderRepository();
+      const result = await orderRepository.updateStatus(orderId, newStatus);
+      
+      if (result.success && result.data) {
+        setOrders(prev => prev.map(order => {
+          if (order.orderId === orderId) {
+            // If order is being marked as completed, update inventory
+            if (newStatus === 'completed' && order.status !== 'completed' && onOrderCompleted) {
+              onOrderCompleted(order.productId, order.quantity);
+              setRecentlyCompleted(orderId);
+              // Clear the recently completed indicator after 3 seconds
+              setTimeout(() => setRecentlyCompleted(null), 3000);
+            }
+            return result.data!;
+          }
+          return order;
+        }));
       }
-      return order;
-    }));
+    } catch (error) {
+      console.error('Error updating order status:', error);
+    }
   };
 
   /**
    * Removes an order from the queue
    */
-  const removeOrder = (orderId: number) => {
-    setOrders(prev => prev.filter(order => order.id !== orderId));
+  const removeOrder = async (orderId: number) => {
+    try {
+      const orderRepository = getRepositoryFactory().getOrderRepository();
+      const result = await orderRepository.delete(orderId);
+      
+      if (result.success) {
+        setOrders(prev => prev.filter(order => order.orderId !== orderId));
+      }
+    } catch (error) {
+      console.error('Error removing order:', error);
+    }
   };
 
   // Show loading state until hydration is complete
@@ -176,27 +213,32 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
 
       {/* Orders List */}
       <div className="space-y-3">
-        {filteredOrders.map((order) => (
-          <div 
-            key={order.id} 
-            className={`border rounded-lg p-4 transition-all duration-300 ${
-              recentlyCompleted === order.id 
-                ? 'border-green-300 bg-green-50 shadow-md' 
-                : 'border-gray-200 bg-white'
-            }`}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1">
-                <h4 className="font-medium text-gray-800">{order.item.name}</h4>
-                <p className="text-sm text-gray-500">
-                  {order.item.size} • {order.item.color}
-                </p>
-                {recentlyCompleted === order.id && (
-                  <p className="text-sm text-green-600 font-medium mt-1">
-                    ✅ Added {order.quantity} items to inventory!
+        {filteredOrders.map((order) => {
+          // Find the corresponding item details
+          const item = items.find(i => i.productId === order.productId);
+          if (!item) return null;
+          
+          return (
+            <div 
+              key={order.orderId} 
+              className={`border rounded-lg p-4 transition-all duration-300 ${
+                recentlyCompleted === order.orderId 
+                  ? 'border-green-300 bg-green-50 shadow-md' 
+                  : 'border-gray-200 bg-white'
+              }`}
+            >
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex-1">
+                  <h4 className="font-medium text-gray-800">{item.name}</h4>
+                  <p className="text-sm text-gray-500">
+                    {item.size} • {item.color}
                   </p>
-                )}
-              </div>
+                  {recentlyCompleted === order.orderId && (
+                    <p className="text-sm text-green-600 font-medium mt-1">
+                      ✅ Added {order.quantity} items to inventory!
+                    </p>
+                  )}
+                </div>
               <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getStatusColor(order.status)}`}>
                 <span className="mr-1">{getStatusIcon(order.status)}</span>
                 {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
@@ -215,7 +257,7 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
             {order.status === 'pending' && (
               <div className="mt-3 flex gap-2">
                 <Button
-                  onClick={() => updateOrderStatus(order.id, 'processing')}
+                  onClick={() => updateOrderStatus(order.orderId, 'processing')}
                   variant="primary"
                   size="sm"
                   className="flex-1"
@@ -223,7 +265,7 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
                   Start Processing
                 </Button>
                 <Button
-                  onClick={() => removeOrder(order.id)}
+                  onClick={() => removeOrder(order.orderId)}
                   variant="danger"
                   size="sm"
                   className="flex-1"
@@ -236,7 +278,7 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
             {order.status === 'processing' && (
               <div className="mt-3 flex gap-2">
                 <Button
-                  onClick={() => updateOrderStatus(order.id, 'completed')}
+                  onClick={() => updateOrderStatus(order.orderId, 'completed')}
                   variant="primary"
                   size="sm"
                   className="flex-1"
@@ -244,7 +286,7 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
                   Mark Complete & Add to Inventory
                 </Button>
                 <Button
-                  onClick={() => updateOrderStatus(order.id, 'pending')}
+                  onClick={() => updateOrderStatus(order.orderId, 'pending')}
                   variant="secondary"
                   size="sm"
                   className="flex-1"
@@ -257,7 +299,7 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
             {order.status === 'completed' && (
               <div className="mt-3 flex gap-2">
                 <Button
-                  onClick={() => removeOrder(order.id)}
+                  onClick={() => removeOrder(order.orderId)}
                   variant="secondary"
                   size="sm"
                   className="flex-1"
@@ -267,7 +309,8 @@ export const OrderQueue = React.memo<OrderQueueProps>(({ items, onOrderCompleted
               </div>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Empty State */}

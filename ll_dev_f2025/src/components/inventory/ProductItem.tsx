@@ -6,7 +6,7 @@ import { TShirtItem } from '@/types';
 
 interface ProductItemProps {
   item: TShirtItem;
-  onQuantityChange: (id: number, quantity: number) => void;
+  onQuantityChange: (productId: number, quantity: number) => void;
 }
 
 export const ProductItem = React.memo<ProductItemProps>(({ item, onQuantityChange }) => {
@@ -45,7 +45,7 @@ export const ProductItem = React.memo<ProductItemProps>(({ item, onQuantityChang
       <div className="w-80 flex items-stretch h-full">
         {/* Decrease Button */}
         <button
-          onClick={() => onQuantityChange(item.id, Math.max(0, item.quantity - 1))}
+          onClick={() => onQuantityChange(item.productId, Math.max(0, item.quantity - 1))}
           className="w-12 rounded-l border border-gray-300 bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors flex-shrink-0"
           aria-label={`Decrease quantity for ${item.name}`}
         >
@@ -88,7 +88,7 @@ export const ProductItem = React.memo<ProductItemProps>(({ item, onQuantityChang
         
         {/* Increase Button */}
         <button
-          onClick={() => onQuantityChange(item.id, item.quantity + 1)}
+          onClick={() => onQuantityChange(item.productId, item.quantity + 1)}
           className="w-12 rounded-r border border-gray-300 bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors flex-shrink-0"
           aria-label={`Increase quantity for ${item.name}`}
         >

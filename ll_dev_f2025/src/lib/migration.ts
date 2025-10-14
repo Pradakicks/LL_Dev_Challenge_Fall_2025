@@ -19,7 +19,7 @@ export function migrateInventoryData(data: any): TShirtItem[] {
   }
 
   return data.map((item: any) => ({
-    id: item.id || 0,
+    productId: item.productId || item.id || Date.now() + Math.floor(Math.random() * 1000),
     name: item.name || 'Unknown Item',
     size: item.size || 'M',
     color: ['red', 'black', 'white'].includes(item.color) ? item.color : 'red',
@@ -36,22 +36,27 @@ export function migrateOrderData(data: any): OrderItem[] {
     return [];
   }
 
-  return data.map((order: any) => ({
-    id: order.id || Date.now(),
-    item: migrateInventoryData([order.item])[0] || {
-      id: 0,
-      name: 'Unknown Item',
-      size: 'M',
-      color: 'red',
-      quantity: 0,
-      requiredPcs: 24,
-    },
-    quantity: typeof order.quantity === 'number' ? order.quantity : 1,
-    status: ['pending', 'processing', 'completed'].includes(order.status) 
-      ? order.status 
-      : 'pending',
-    orderDate: order.orderDate || new Date().toISOString().split('T')[0],
-  }));
+  return data.map((order: any) => {
+    // Handle cases where order.item might be undefined or have different structure
+    let productId = 0;
+    if (order.item && typeof order.item === 'object') {
+      const migratedItem = migrateInventoryData([order.item])[0];
+      productId = migratedItem?.productId || 0;
+    } else if (order.productId) {
+      // If order already has productId, use it
+      productId = order.productId;
+    }
+
+    return {
+      orderId: order.orderId || order.id || Date.now(),
+      productId: productId,
+      quantity: typeof order.quantity === 'number' ? order.quantity : 1,
+      status: ['pending', 'processing', 'completed'].includes(order.status) 
+        ? order.status 
+        : 'pending',
+      orderDate: order.orderDate || new Date().toISOString().split('T')[0],
+    };
+  });
 }
 
 /**

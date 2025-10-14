@@ -90,7 +90,7 @@ export interface ConvertedProduct {
  * Core T-shirt inventory item interface
  */
 export interface TShirtItem {
-  readonly id: number;
+  readonly productId: number;
   name: string;
   size: ProductSize;
   color: ProductColor;
@@ -99,16 +99,16 @@ export interface TShirtItem {
 }
 
 /**
- * Data required to create a new T-shirt item (without ID)
+ * Data required to create a new T-shirt item (without productId)
  */
-export type CreateTShirtItem = Omit<TShirtItem, 'id'>;
+export type CreateTShirtItem = Omit<TShirtItem, 'productId'>;
 
 /**
  * Order item for fulfillment queue
  */
 export interface OrderItem {
-  readonly id: number;
-  item: TShirtItem;
+  readonly orderId: number;
+  productId: number;
   quantity: number;
   status: OrderStatus;
   orderDate: string;
